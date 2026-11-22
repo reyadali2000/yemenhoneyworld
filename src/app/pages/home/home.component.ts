@@ -1,5 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CategoryId, Product } from '../../models/catalog.models';
+import { CartService } from '../../services/cart.service';
 import { CatalogService } from '../../services/catalog.service';
 
 @Component({
@@ -9,6 +11,7 @@ import { CatalogService } from '../../services/catalog.service';
   template: `
     <!-- الواجهة المؤسسية الرئيسية للشركة -->
     <section class="corp-hero">
+      <div class="hero-ambient-orb"></div>
       <div class="container corp-hero-grid">
         <div class="corp-hero-content">
           <div class="corp-badge">🏛️ الموقع الرسمي والمؤسسي لشركة عالم العسل اليمني</div>
@@ -20,8 +23,8 @@ import { CatalogService } from '../../services/catalog.service';
             {{ catalog.siteConfig.description }}
           </p>
           <div class="corp-hero-actions">
-            <a routerLink="/about" class="btn-gold">تعرّف على شركة عالم العسل</a>
-            <a routerLink="/shop" class="btn-outline-light">🛍️ الدخول إلى المتجر الإلكتروني</a>
+            <a routerLink="/shop" class="btn-gold">🛍️ الدخول إلى المتجر الإلكتروني</a>
+            <a routerLink="/about" class="btn-outline-light">تعرّف على شركة عالم العسل</a>
           </div>
           <div class="hero-trust-row">
             <span class="trust-pill">✓ فحص مخبري معتمد</span>
@@ -31,30 +34,39 @@ import { CatalogService } from '../../services/catalog.service';
         </div>
 
         <div class="corp-hero-visual">
-          <div class="visual-card main-visual">
-            <span class="visual-royal-tag">👑 قطفة أولى ملكية</span>
-            <img
-              src="assets/products/قسم العسل الطبيعي/السدر/عسل السدر الدوعني الملكي(قطفة أولئ).png"
-              alt="عسل السدر الدوعني الملكي - شركة عالم العسل اليمني"
-            />
-            <div class="visual-caption">
-              <span>الهوية اليمنية الأصيلة</span>
-              <strong>من مناحل دوعن وعصيم وأبين إلى العالم</strong>
+          @if (activeSpotlight(); as spot) {
+            <div class="visual-card main-visual">
+              <span class="visual-royal-tag">{{ spot.tag }}</span>
+              <span class="visual-purity-seal">🐝 نقي 100%</span>
+              <img
+                [src]="spot.image"
+                [alt]="spot.title"
+                class="spotlight-img"
+              />
+              <div class="visual-caption">
+                <span>{{ spot.eyebrow }}</span>
+                <strong>{{ spot.title }}</strong>
+              </div>
             </div>
-          </div>
+          }
           <div class="visual-subgrid">
-            <div class="visual-card">
-              <img src="assets/products/التمور/التمور.jpg" alt="التمور الفاخرة" />
-            </div>
-            <div class="visual-card">
-              <img src="assets/products/قسم العناية الشخصية/1.png" alt="منتجات العناية الطبيعية" />
-            </div>
+            @for (item of spotlightItems; track item.title; let i = $index) {
+              <button
+                type="button"
+                class="visual-card visual-thumb-btn"
+                [class.active]="activeSpotlightIndex() === i"
+                (click)="selectSpotlight(i)"
+              >
+                <img [src]="item.image" [alt]="item.title" />
+                <span class="thumb-label">{{ item.shortTitle }}</span>
+              </button>
+            }
           </div>
         </div>
       </div>
     </section>
 
-    <!-- أرقام ومؤشرات الشركة -->
+    <!-- أرقام ومؤشرات الشركة العائمة -->
     <section class="milestones-strip">
       <div class="container milestones-grid">
         @for (m of catalog.milestones; track m.label) {
@@ -116,8 +128,94 @@ import { CatalogService } from '../../services/catalog.service';
       </div>
     </section>
 
-    <!-- قطاعات العمل الستة (عرض مؤسسي بدون أسعار) -->
+    <!-- تشكيلة مختارة من الكنوز اليمنية -->
     <section class="section-block-alt">
+      <div class="container">
+        <div class="section-heading" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <span class="eyebrow">✦ كنوزنا المختارة</span>
+            <h2>إصدارات ملكية من قلب المناحل اليمنية</h2>
+            <p>تنقّل بين الأقسام لاستكشاف مختاراتنا المنتقاة بعناية والمتوفرة للطلب الفوري.</p>
+          </div>
+          <a routerLink="/shop" class="btn-gold">استعرض المتجر كاملاً ←</a>
+        </div>
+
+        <div class="curated-tabs">
+          @for (cat of catalog.categories; track cat.id) {
+            @if (cat.id !== 'all') {
+              <button
+                type="button"
+                class="curated-tab-btn"
+                [class.active]="curatedCategory() === cat.id"
+                (click)="curatedCategory.set(cat.id)"
+              >
+                <span>{{ cat.icon }}</span>
+                <span>{{ cat.shortName }}</span>
+              </button>
+            }
+          }
+        </div>
+
+        <div class="curated-grid">
+          @for (item of featuredProducts(); track item.code) {
+            <article class="curated-card">
+              <a [routerLink]="['/shop/product', item.code]" class="curated-media">
+                @if (item.badge) {
+                  <span class="curated-badge">{{ item.badge }}</span>
+                }
+                <img [src]="item.image" [alt]="item.name" loading="lazy" />
+              </a>
+              <div class="curated-body">
+                <span class="curated-cat">{{ item.subCategory }} • {{ item.unit }}</span>
+                <a [routerLink]="['/shop/product', item.code]" class="curated-title">{{ item.name }}</a>
+                <div class="curated-footer">
+                  <div class="curated-price">
+                    {{ catalog.formatPrice(item.price) }}
+                    @if (item.price) {
+                      <small>{{ catalog.siteConfig.currency }}</small>
+                    }
+                  </div>
+                  <div class="curated-actions">
+                    <button
+                      type="button"
+                      class="curated-add-btn"
+                      [class.added]="justAddedCode() === item.code"
+                      (click)="quickAdd(item)"
+                    >
+                      {{ justAddedCode() === item.code ? '✓ أُضيف' : '🛒 أضف' }}
+                    </button>
+                    <a [routerLink]="['/shop/product', item.code]" class="curated-view-btn" title="تفاصيل المنتج">←</a>
+                  </div>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- رحلة القطرة الذهبية — معايير الفخامة والنقاء -->
+    <section class="journey-strip">
+      <div class="container">
+        <div class="journey-header">
+          <span class="page-hero-eyebrow">✦ معايير الفخامة والنقاء</span>
+          <h2>رحلة القطرة الذهبية — من المنحل إلى مائدتك</h2>
+        </div>
+        <div class="journey-grid">
+          @for (step of journeySteps; track step.num) {
+            <div class="journey-card">
+              <div class="journey-hex">{{ step.icon }}</div>
+              <span class="journey-num">المرحلة {{ step.num }}</span>
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.desc }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- قطاعات العمل الستة (عرض مؤسسي بدون أسعار) -->
+    <section class="section-block">
       <div class="container">
         <div class="section-heading" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;">
           <div>
@@ -154,7 +252,7 @@ import { CatalogService } from '../../services/catalog.service';
     </section>
 
     <!-- خدماتنا للأفراد والأعمال -->
-    <section class="section-block">
+    <section class="section-block-alt">
       <div class="container">
         <div class="section-heading" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;">
           <div>
@@ -204,8 +302,20 @@ import { CatalogService } from '../../services/catalog.service';
         radial-gradient(circle at 15% 80%, rgba(200, 141, 42, 0.14) 0%, transparent 45%),
         linear-gradient(145deg, #100B06 0%, #22180E 55%, #120D08 100%);
       color: #FFFFFF;
-      padding: 4.5rem 0 4.25rem;
+      padding: 4.5rem 0 6.25rem;
       border-bottom: 3px solid var(--gold-primary);
+    }
+
+    .hero-ambient-orb {
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      top: -120px;
+      left: 8%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(229, 184, 75, 0.18) 0%, transparent 70%);
+      filter: blur(24px);
+      pointer-events: none;
     }
 
     .corp-hero::before {
@@ -341,18 +451,61 @@ import { CatalogService } from '../../services/catalog.service';
       animation: floatSlow 4s ease-in-out infinite;
     }
 
+    .visual-purity-seal {
+      position: absolute;
+      top: 0.85rem;
+      left: 0.85rem;
+      z-index: 2;
+      background: linear-gradient(135deg, rgba(229, 184, 75, 0.95), rgba(200, 141, 42, 0.95));
+      color: var(--obsidian);
+      padding: 0.26rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 900;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    }
+
     .main-visual {
-      height: 280px;
+      height: 300px;
+    }
+
+    .spotlight-img {
+      animation: spotlightFade 0.45s ease-out;
     }
 
     .visual-subgrid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.9rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
     }
 
-    .visual-subgrid .visual-card {
-      height: 138px;
+    .visual-thumb-btn {
+      height: 92px;
+      padding: 0;
+      cursor: pointer;
+      opacity: 0.72;
+      text-align: right;
+    }
+
+    .visual-thumb-btn.active,
+    .visual-thumb-btn:hover {
+      opacity: 1;
+      border-color: var(--gold-bright);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45), 0 0 14px rgba(229, 184, 75, 0.28);
+    }
+
+    .thumb-label {
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: 0.45rem 0.55rem 0.35rem;
+      background: linear-gradient(to top, rgba(12, 8, 4, 0.94), transparent);
+      color: #F7E7C0;
+      font-size: 0.72rem;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .visual-card img {
@@ -387,25 +540,29 @@ import { CatalogService } from '../../services/catalog.service';
     }
 
     .milestones-strip {
-      background: linear-gradient(180deg, #1B140C 0%, #140E08 100%);
-      border-bottom: 1.5px solid rgba(229, 184, 75, 0.28);
-      padding: 2.2rem 0;
+      position: relative;
+      z-index: 4;
+      margin-top: -2.85rem;
+      padding: 0 0 1.25rem;
       color: #FFFFFF;
     }
 
     .milestones-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1.25rem;
+      gap: 1.15rem;
     }
 
     .milestone-card {
       position: relative;
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(229, 184, 75, 0.22);
+      background: rgba(22, 16, 10, 0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(229, 184, 75, 0.34);
       border-radius: var(--radius-md);
-      padding: 1.3rem;
+      padding: 1.35rem;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
       transition: var(--transition);
     }
 
@@ -530,6 +687,274 @@ import { CatalogService } from '../../services/catalog.service';
     .quote-author span {
       font-size: 0.84rem;
       color: #C7B6A2;
+    }
+
+    .curated-tabs {
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .curated-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-color);
+      color: var(--obsidian);
+      padding: 0.48rem 1rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .curated-tab-btn:hover {
+      border-color: var(--gold-primary);
+      transform: translateY(-2px);
+    }
+
+    .curated-tab-btn.active {
+      background: linear-gradient(145deg, #1E160E, var(--obsidian));
+      color: var(--gold-bright);
+      border-color: var(--gold-bright);
+      box-shadow: var(--shadow-gold);
+    }
+
+    .curated-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .curated-view-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-gold);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: var(--obsidian);
+      transition: var(--transition);
+    }
+
+    .curated-view-btn:hover {
+      background: var(--obsidian);
+      color: var(--gold-bright);
+      border-color: var(--obsidian);
+    }
+
+    .journey-strip {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(229, 184, 75, 0.18) 0%, transparent 45%),
+        linear-gradient(145deg, #120D08 0%, #21170E 55%, #130E09 100%);
+      color: #FFFFFF;
+      padding: 3.75rem 0;
+      border-top: 2px solid var(--gold-primary);
+      border-bottom: 2px solid var(--gold-primary);
+    }
+
+    .journey-header {
+      text-align: center;
+      margin-bottom: 2.25rem;
+    }
+
+    .journey-header h2 {
+      font-size: 1.85rem;
+      font-weight: 900;
+      color: #FFFFFF;
+    }
+
+    .journey-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    .journey-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(229, 184, 75, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.25rem;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .journey-card:hover {
+      transform: translateY(-6px);
+      background: rgba(229, 184, 75, 0.08);
+      border-color: var(--gold-bright);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.38);
+    }
+
+    .journey-hex {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 0.75rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(229, 184, 75, 0.22), rgba(200, 141, 42, 0.08));
+      border: 1.5px solid var(--gold-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.65rem;
+      transition: var(--transition);
+    }
+
+    .journey-card:hover .journey-hex {
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold-primary));
+      transform: scale(1.08) rotate(-5deg);
+    }
+
+    .journey-num {
+      display: inline-block;
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: var(--gold-bright);
+      margin-bottom: 0.3rem;
+    }
+
+    .journey-card h3 {
+      font-size: 1.04rem;
+      font-weight: 800;
+      margin-bottom: 0.45rem;
+      color: #FFFFFF;
+    }
+
+    .journey-card p {
+      font-size: 0.84rem;
+      color: #D1C1AE;
+      line-height: 1.65;
+    }
+
+    .curated-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    .curated-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+    }
+
+    .curated-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--gold-primary);
+      box-shadow: var(--shadow-lg), 0 0 0 1px rgba(229, 184, 75, 0.25);
+    }
+
+    .curated-media {
+      position: relative;
+      height: 210px;
+      background: radial-gradient(circle at 50% 45%, #FFFFFF 0%, #F3ECE0 100%);
+      border-bottom: 1px solid var(--border-color);
+      overflow: hidden;
+      display: block;
+    }
+
+    .curated-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 0.75rem;
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .curated-card:hover .curated-media img {
+      transform: scale(1.08);
+    }
+
+    .curated-badge {
+      position: absolute;
+      top: 0.7rem;
+      right: 0.7rem;
+      z-index: 2;
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold-primary));
+      color: var(--obsidian);
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.14);
+    }
+
+    .curated-body {
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .curated-cat {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      margin-bottom: 0.25rem;
+    }
+
+    .curated-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--obsidian);
+      line-height: 1.4;
+      margin-bottom: 0.9rem;
+      flex: 1;
+    }
+
+    .curated-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding-top: 0.75rem;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .curated-price {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--obsidian);
+    }
+
+    .curated-price small {
+      font-size: 0.75rem;
+      color: var(--gold-dark);
+    }
+
+    .curated-add-btn {
+      background: linear-gradient(135deg, #F3CE6A, var(--gold-primary));
+      color: var(--obsidian);
+      border: 1px solid rgba(255, 240, 195, 0.65);
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .curated-add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-gold);
+    }
+
+    .curated-add-btn.added {
+      background: #15803D;
+      color: #FFFFFF;
+      border-color: #16A34A;
     }
 
     .sectors-grid {
@@ -758,9 +1183,9 @@ import { CatalogService } from '../../services/catalog.service';
         grid-template-columns: 1fr;
       }
       .milestones-grid,
-      .services-preview-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .curated-grid,
+      .journey-grid,
+      .services-preview-grid,
       .sectors-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -796,13 +1221,14 @@ import { CatalogService } from '../../services/catalog.service';
         padding: 0.25rem 0.65rem;
       }
       .main-visual {
-        height: 215px;
+        height: 225px;
       }
-      .visual-subgrid .visual-card {
-        height: 112px;
+      .visual-thumb-btn {
+        height: 78px;
       }
       .milestones-strip {
-        padding: 1.5rem 0;
+        margin-top: -1.5rem;
+        padding: 0 0 1rem;
       }
       .milestones-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -814,6 +1240,8 @@ import { CatalogService } from '../../services/catalog.service';
       .milestone-num {
         font-size: 1.35rem;
       }
+      .curated-grid,
+      .journey-grid,
       .sectors-grid,
       .services-preview-grid {
         grid-template-columns: 1fr;
@@ -845,6 +1273,98 @@ import { CatalogService } from '../../services/catalog.service';
     }
   `]
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit, OnDestroy {
   readonly catalog = inject(CatalogService);
+  private readonly cart = inject(CartService);
+  private spotlightTimer: ReturnType<typeof setInterval> | null = null;
+
+  readonly spotlightItems = [
+    {
+      shortTitle: 'السدر الملكي',
+      tag: '👑 قطفة أولى ملكية',
+      eyebrow: 'الهوية اليمنية الأصيلة',
+      title: 'عسل السدر الدوعني الملكي — من مناحل دوعن إلى العالم',
+      image: 'assets/products/قسم العسل الطبيعي/السدر/عسل السدر الدوعني الملكي(قطفة أولئ).png'
+    },
+    {
+      shortTitle: 'التمور الفاخرة',
+      tag: '🌴 انتقاء موسمي فاخر',
+      eyebrow: 'تراث الضيافة العربية',
+      title: 'أجود أنواع التمور المنتقاة بتغليف فاخر ومثالي للإهداء',
+      image: 'assets/products/التمور/التمور.jpg'
+    },
+    {
+      shortTitle: 'العناية الطبيعية',
+      tag: '✨ خلاصة النحل النقية',
+      eyebrow: 'جمال مستوحى من الطبيعة',
+      title: 'مستحضرات عناية شخصية غنية بالعسل الملكي والبروبلس',
+      image: 'assets/products/قسم العناية الشخصية/1.png'
+    }
+  ];
+
+  readonly journeySteps = [
+    {
+      num: '01',
+      icon: '🐝',
+      title: 'المناحل الجبلية والوديان',
+      desc: 'رعي طبيعي في أودية دوعن وعصيم وجبال اليمن الغنية بأشجار السدر والزهور البرية.'
+    },
+    {
+      num: '02',
+      icon: '🏺',
+      title: 'الفرز البارد الخام',
+      desc: 'استخلاص تقليدي بدون بسترة حرارية للحفاظ على الإنزيمات الحيوية وحبوب اللقاح.'
+    },
+    {
+      num: '03',
+      icon: '🔬',
+      title: 'الفحص والتوثيق المخبري',
+      desc: 'اختبار كل قطفة للتأكد من النقاء ومطابقة المواصفات القياسية المعتمدة.'
+    },
+    {
+      num: '04',
+      icon: '🌍',
+      title: 'التغليف الملكي والتوريد',
+      desc: 'تعبئة فاخرة تحفظ الخواص العلاجية وتلبي طلبات الأفراد والتجار والتصدير الدولي.'
+    }
+  ];
+
+  readonly activeSpotlightIndex = signal(0);
+  readonly activeSpotlight = computed(() => this.spotlightItems[this.activeSpotlightIndex()]);
+  readonly curatedCategory = signal<CategoryId>('honey');
+  readonly featuredProducts = computed(() =>
+    this.catalog.products
+      .filter((p) => p.category === this.curatedCategory())
+      .slice(0, 4)
+  );
+  readonly justAddedCode = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.spotlightTimer = setInterval(() => {
+      this.activeSpotlightIndex.update((i) => (i + 1) % this.spotlightItems.length);
+    }, 4500);
+  }
+
+  ngOnDestroy(): void {
+    if (this.spotlightTimer) {
+      clearInterval(this.spotlightTimer);
+    }
+  }
+
+  selectSpotlight(index: number): void {
+    this.activeSpotlightIndex.set(index);
+    if (this.spotlightTimer) {
+      clearInterval(this.spotlightTimer);
+    }
+  }
+
+  quickAdd(product: Product): void {
+    this.cart.addItem(product, 1);
+    this.justAddedCode.set(product.code);
+    setTimeout(() => {
+      if (this.justAddedCode() === product.code) {
+        this.justAddedCode.set(null);
+      }
+    }, 1400);
+  }
 }

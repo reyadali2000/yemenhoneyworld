@@ -113,4 +113,13 @@
     <span>✅ {{ msg }}</span>
     <a routerLink="/shop/cart" class="toast-action">عرض السلة ←</a>
   </div>
+} @else if (cart.totalCount() > 0 && currentUrl() !== '/shop/cart') {
+  <a routerLink="/shop/cart" class="floating-cart-dock" title="استعراض سلة الطلبات">
+    <span class="dock-icon">🛒</span>
+    <div class="dock-info">
+      <span class="dock-count">{{ cart.totalCount() }} أصناف في السلة</span>
+      <strong class="dock-total">{{ catalog.formatPrice(cart.totalPrice()) }} {{ catalog.siteConfig.currency }}</strong>
+    </div>
+    <span class="dock-cta">إتمام الطلب ←</span>
+  </a>
 }

@@ -160,9 +160,10 @@ import { CatalogService } from '../../services/catalog.service';
                       <button
                         type="button"
                         class="btn-cart-add"
-                        (click)="cart.addItem(item, 1)"
+                        [class.added]="justAddedCode() === item.code"
+                        (click)="addToCart(item)"
                       >
-                        <span>🛒 أضف للسلة</span>
+                        <span>{{ justAddedCode() === item.code ? '✓ تمت الإضافة' : '🛒 أضف للسلة' }}</span>
                       </button>
                       <a [routerLink]="['/shop/product', item.code]" class="btn-view">
                         <span>التفاصيل</span>
@@ -614,6 +615,13 @@ import { CatalogService } from '../../services/catalog.service';
       transform: scale(0.97);
     }
 
+    .btn-cart-add.added {
+      background: linear-gradient(135deg, #16A34A, #15803D);
+      color: #FFFFFF;
+      border-color: #22C55E;
+      box-shadow: 0 6px 18px rgba(21, 128, 61, 0.35);
+    }
+
     .btn-view {
       display: inline-flex;
       align-items: center;
@@ -771,6 +779,17 @@ export class ShopComponent implements OnInit {
   readonly searchQuery = signal<string>('');
   readonly sortBy = signal<'default' | 'price-asc' | 'price-desc' | 'code-asc'>('default');
   readonly viewMode = signal<'grid' | 'table'>('grid');
+  readonly justAddedCode = signal<string | null>(null);
+
+  addToCart(item: Product): void {
+    this.cart.addItem(item, 1);
+    this.justAddedCode.set(item.code);
+    setTimeout(() => {
+      if (this.justAddedCode() === item.code) {
+        this.justAddedCode.set(null);
+      }
+    }, 1400);
+  }
 
   readonly subCategories = computed(() => {
     const cat = this.selectedCategory();
