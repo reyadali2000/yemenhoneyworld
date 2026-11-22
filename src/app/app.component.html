@@ -1,0 +1,116 @@
+<!-- شريط التنقل الرئيسي (الهوية المؤسسية + بوابة المتجر) -->
+<header class="site-header">
+  <div class="container header-inner">
+    <a routerLink="/" class="brand-logo">
+      <div class="brand-emblem">
+        <img src="assets/logo.png" alt="شعار شركة عالم العسل اليمني" class="brand-logo-img" />
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">{{ catalog.siteConfig.companyName }}</span>
+        <span class="brand-sub">{{ catalog.siteConfig.slogan }} • {{ catalog.siteConfig.companyNameEn }}</span>
+      </div>
+    </a>
+
+    <button
+      type="button"
+      class="mobile-toggle"
+      (click)="toggleMobileMenu()"
+      aria-label="القائمة"
+    >
+      {{ mobileMenuOpen() ? '✕' : '☰' }}
+    </button>
+
+    <nav class="main-nav" [class.open]="mobileMenuOpen()" aria-label="التنقل الرئيسي">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">الرئيسية</a>
+      <a routerLink="/about" routerLinkActive="active" class="nav-link">عن الشركة</a>
+      <a routerLink="/activities" routerLinkActive="active" class="nav-link">أنشطتنا</a>
+      <a routerLink="/services" routerLinkActive="active" class="nav-link">خدماتنا</a>
+      <a routerLink="/branches" routerLinkActive="active" class="nav-link">الفروع</a>
+      <a routerLink="/contact" routerLinkActive="active" class="nav-link">تواصل معنا</a>
+
+      <div class="nav-divider"></div>
+
+      <a routerLink="/shop" routerLinkActive="active-shop" class="btn-shop-entry">
+        <span>🛍️ المتجر الإلكتروني</span>
+      </a>
+
+      @if (showCartButton()) {
+        <a routerLink="/shop/cart" routerLinkActive="active-cart" class="btn-cart-nav" title="سلة الطلبات">
+          <span>🛒 السلة</span>
+          <span class="cart-count-pill">{{ cart.totalCount() }}</span>
+        </a>
+      }
+    </nav>
+  </div>
+
+</header>
+
+<!-- محتوى الصفحة النشطة -->
+<main class="app-main">
+  <router-outlet />
+</main>
+
+<!-- التذييل المؤسسي والتجاري الموحد -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand-col">
+        <div class="footer-logo-wrap">
+          <img src="assets/logo.png" alt="شعار شركة عالم العسل اليمني" class="footer-logo-img" />
+          <div>
+            <h3>{{ catalog.siteConfig.companyName }}</h3>
+            <p class="footer-slogan">{{ catalog.siteConfig.slogan }} — {{ catalog.siteConfig.sloganEn }}</p>
+          </div>
+        </div>
+        <p class="footer-desc">{{ catalog.siteConfig.description }}</p>
+      </div>
+
+      <div>
+        <h4>الشركة والهوية</h4>
+        <ul class="footer-links">
+          <li><a routerLink="/">الرئيسية</a></li>
+          <li><a routerLink="/about">عن الشركة والتاريخ</a></li>
+          <li><a routerLink="/activities">قطاعاتنا وأنشطتنا</a></li>
+          <li><a routerLink="/services">خدمات التجزئة والجملة والتصدير</a></li>
+          <li><a routerLink="/branches">الفروع ومناطق الانتشار</a></li>
+          <li><a routerLink="/contact">تواصل معنا</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>المتجر الإلكتروني</h4>
+        <ul class="footer-links">
+          <li><a routerLink="/shop">تصفح المتجر الإلكتروني</a></li>
+          <li><a routerLink="/shop" [queryParams]="{ category: 'honey' }">العسل اليمني الطبيعي</a></li>
+          <li><a routerLink="/shop" [queryParams]="{ category: 'dates' }">التمور الفاخرة VIP</a></li>
+          <li><a routerLink="/shop" [queryParams]="{ category: 'personal-care' }">منتجات العناية الشخصية</a></li>
+          <li><a routerLink="/shop" [queryParams]="{ category: 'oils' }">الزيوت الطبيعية والبروبلس</a></li>
+          <li><a routerLink="/shop/cart">سلة الطلبات وإتمام الشراء</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>التواصل الرسمي</h4>
+        <ul class="footer-links">
+          <li>📞 <strong dir="ltr">{{ catalog.siteConfig.contact.phonePrimary }}</strong></li>
+          <li>💬 واتساب: <span dir="ltr">{{ catalog.siteConfig.contact.whatsappDisplay }}</span></li>
+          <li>✉️ <span dir="ltr">{{ catalog.siteConfig.contact.email }}</span></li>
+          <li>🌍 <span dir="ltr">{{ catalog.siteConfig.contact.website }}</span></li>
+          <li>📍 {{ catalog.siteConfig.contact.addressMain }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© جميع الحقوق محفوظة — {{ catalog.siteConfig.companyName }}</span>
+      <span>{{ catalog.siteConfig.slogan }} • {{ catalog.siteConfig.social.handle }}</span>
+    </div>
+  </div>
+</footer>
+
+@if (cart.toastMessage(); as msg) {
+  <div class="toast-banner" role="status" aria-live="polite">
+    <span>✅ {{ msg }}</span>
+    <a routerLink="/shop/cart" class="toast-action">عرض السلة ←</a>
+  </div>
+}
