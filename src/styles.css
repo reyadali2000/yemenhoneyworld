@@ -26,10 +26,14 @@
   --shadow-lg: 0 24px 54px rgba(21, 16, 11, 0.18);
   --shadow-gold: 0 10px 28px rgba(200, 141, 42, 0.28);
   --shadow-gold-lg: 0 14px 36px rgba(229, 184, 75, 0.38);
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --glass-blur: blur(22px) saturate(185%);
+  --glass-specular-dark: inset 0 1px 0 rgba(255, 255, 255, 0.24), inset 0 -1px 0 rgba(229, 184, 75, 0.14);
+  --glass-specular-light: inset 0 1.5px 0 rgba(255, 255, 255, 0.92), inset 0 -1px 0 rgba(200, 141, 42, 0.12);
+  --transition: all 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-fluid: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* حركات تفاعلية موحدة */
@@ -177,23 +181,26 @@ button, input, select, textarea {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: rgba(255, 253, 249, 0.7);
+  background: rgba(255, 253, 249, 0.58);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
   color: var(--obsidian);
-  border: 1.5px solid var(--gold-primary);
+  border: 1.5px solid rgba(200, 141, 42, 0.55);
+  box-shadow: var(--glass-specular-light), var(--shadow-sm);
   font-weight: 800;
   font-size: 0.94rem;
   padding: 0.74rem 1.55rem;
   border-radius: 999px;
   cursor: pointer;
-  transition: var(--transition);
+  transition: var(--transition-fluid);
 }
 
 .btn-outline-dark:hover {
-  background: var(--obsidian);
+  background: rgba(21, 16, 11, 0.9);
   color: var(--gold-bright);
-  border-color: var(--obsidian);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  border-color: rgba(229, 184, 75, 0.7);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--glass-specular-dark), var(--shadow-md);
 }
 
 .btn-outline-light {
@@ -201,24 +208,26 @@ button, input, select, textarea {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--gold-light);
-  border: 1.5px solid rgba(229, 184, 75, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.24);
+  box-shadow: var(--glass-specular-dark);
   font-weight: 700;
   font-size: 0.94rem;
   padding: 0.78rem 1.6rem;
   border-radius: 999px;
   cursor: pointer;
-  transition: var(--transition);
+  transition: var(--transition-fluid);
 }
 
 .btn-outline-light:hover {
   background: rgba(229, 184, 75, 0.2);
-  border-color: var(--gold-bright);
+  border-color: rgba(229, 184, 75, 0.75);
   color: #FFFFFF;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(229, 184, 75, 0.22);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--glass-specular-dark), 0 10px 26px rgba(229, 184, 75, 0.24);
 }
 
 .btn-obsidian {

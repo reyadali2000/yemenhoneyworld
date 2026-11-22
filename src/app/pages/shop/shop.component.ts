@@ -279,29 +279,32 @@ import { CatalogService } from '../../services/catalog.service';
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      background: var(--bg-card);
-      border: 1.5px solid var(--border-color);
+      background: rgba(255, 253, 249, 0.7);
+      backdrop-filter: blur(14px) saturate(170%);
+      -webkit-backdrop-filter: blur(14px) saturate(170%);
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
       color: var(--obsidian);
       padding: 0.52rem 1rem;
       border-radius: 999px;
       font-weight: 800;
       font-size: 0.86rem;
       cursor: pointer;
-      transition: var(--transition);
-      box-shadow: var(--shadow-sm);
+      transition: var(--transition-fluid);
+      box-shadow: var(--glass-specular-light), var(--shadow-sm);
     }
 
     .shop-cat-pill:hover {
       border-color: var(--gold-primary);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: var(--glass-specular-light), var(--shadow-md);
     }
 
     .shop-cat-pill.active {
-      background: linear-gradient(145deg, #1E160E, var(--obsidian));
+      background: rgba(21, 16, 11, 0.84);
+      backdrop-filter: var(--glass-blur);
       color: var(--gold-bright);
-      border-color: var(--gold-bright);
-      box-shadow: var(--shadow-gold);
+      border-color: rgba(255, 255, 255, 0.24);
+      box-shadow: var(--glass-specular-dark), var(--shadow-gold);
     }
 
     .pill-count {
@@ -318,11 +321,13 @@ import { CatalogService } from '../../services/catalog.service';
     }
 
     .shop-toolbar {
-      background: var(--bg-card);
-      border: 1.5px solid var(--border-color);
+      background: rgba(255, 253, 249, 0.72);
+      backdrop-filter: blur(18px) saturate(175%);
+      -webkit-backdrop-filter: blur(18px) saturate(175%);
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
       border-radius: var(--radius-lg);
       padding: 1.15rem;
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--glass-specular-light), var(--shadow-sm);
       margin-bottom: 1.15rem;
     }
 
@@ -422,41 +427,78 @@ import { CatalogService } from '../../services/catalog.service';
     }
 
     .product-card {
-      background: var(--bg-card);
-      border: 1.5px solid var(--border-color);
-      border-radius: var(--radius-lg);
+      position: relative;
+      background: rgba(255, 253, 249, 0.68);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1.5px solid rgba(255, 255, 255, 0.88);
+      border-radius: 26px;
       overflow: hidden;
-      box-shadow: var(--shadow-sm);
+      box-shadow:
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 0 rgba(200, 141, 42, 0.14),
+        0 10px 28px rgba(21, 16, 11, 0.06);
       display: flex;
       flex-direction: column;
-      transition: var(--transition);
+      transition: var(--transition-fluid);
+    }
+
+    .product-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(125deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 42%);
+      pointer-events: none;
+      z-index: 1;
     }
 
     .product-card:hover {
-      transform: translateY(-6px);
-      border-color: var(--gold-primary);
-      box-shadow: var(--shadow-lg), 0 0 0 1px rgba(229, 184, 75, 0.25);
+      transform: translateY(-8px) scale(1.012);
+      border-color: rgba(229, 184, 75, 0.8);
+      box-shadow:
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.98),
+        0 24px 48px rgba(21, 16, 11, 0.14),
+        0 0 28px rgba(229, 184, 75, 0.22);
     }
 
     .product-media {
       position: relative;
-      height: 235px;
-      background: radial-gradient(circle, #FFFFFF, #F4EFE6);
-      border-bottom: 1px solid var(--border-color);
+      height: 230px;
+      margin: 0.65rem 0.65rem 0;
+      border-radius: 20px;
+      background: radial-gradient(circle at 50% 45%, #FFFFFF 0%, #EFE5D4 100%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: inset 0 2px 10px rgba(21, 16, 11, 0.04);
       display: block;
       overflow: hidden;
     }
 
+    .product-media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(229, 184, 75, 0.18), transparent 65%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+
+    .product-card:hover .product-media::after {
+      opacity: 1;
+    }
+
     .product-media img {
+      position: relative;
+      z-index: 1;
       width: 100%;
       height: 100%;
       object-fit: contain;
-      padding: 0.5rem;
-      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      padding: 0.65rem;
+      transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .product-card:hover .product-media img {
-      transform: scale(1.07);
+      transform: scale(1.08);
     }
 
     .media-badges {
@@ -471,25 +513,35 @@ import { CatalogService } from '../../services/catalog.service';
     }
 
     .sku-tag {
-      background: rgba(21, 16, 11, 0.88);
+      background: rgba(18, 12, 7, 0.65);
+      backdrop-filter: blur(12px) saturate(170%);
+      -webkit-backdrop-filter: blur(12px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
       color: var(--gold-bright);
       font-size: 0.74rem;
       font-weight: 800;
-      padding: 0.18rem 0.6rem;
+      padding: 0.2rem 0.65rem;
       border-radius: 999px;
     }
 
     .feat-tag {
-      background: var(--gold-bright);
+      background: rgba(229, 184, 75, 0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 4px 10px rgba(0, 0, 0, 0.12);
       color: var(--obsidian);
       font-size: 0.73rem;
       font-weight: 800;
-      padding: 0.18rem 0.6rem;
+      padding: 0.2rem 0.65rem;
       border-radius: 999px;
     }
 
     .product-info {
-      padding: 1.15rem;
+      position: relative;
+      z-index: 2;
+      padding: 1.05rem 1.15rem 1.15rem;
       display: flex;
       flex-direction: column;
       flex: 1;
@@ -498,16 +550,20 @@ import { CatalogService } from '../../services/catalog.service';
     .info-top {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 0.76rem;
       font-weight: 700;
       color: var(--gold-dark);
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.35rem;
     }
 
     .unit-tag {
-      background: var(--bg-alt);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(200, 141, 42, 0.28);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
       color: var(--text-secondary);
-      padding: 0.05rem 0.55rem;
+      padding: 0.12rem 0.65rem;
       border-radius: 999px;
     }
 
@@ -515,20 +571,23 @@ import { CatalogService } from '../../services/catalog.service';
       font-size: 1.08rem;
       font-weight: 800;
       color: var(--obsidian);
-      margin-bottom: 0.55rem;
+      margin-bottom: 0.6rem;
       line-height: 1.38;
     }
 
     .product-benefit-snippet {
-      font-size: 0.84rem;
+      font-size: 0.83rem;
       color: var(--text-secondary);
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      background: rgba(242, 234, 224, 0.55);
-      padding: 0.55rem 0.75rem;
-      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.52);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+      padding: 0.6rem 0.8rem;
+      border-radius: 14px;
       border-right: 3px solid var(--gold-primary);
       margin-bottom: 1rem;
       flex: 1;
@@ -593,33 +652,37 @@ import { CatalogService } from '../../services/catalog.service';
       align-items: center;
       justify-content: center;
       gap: 0.4rem;
-      background: linear-gradient(135deg, #F3CE6A 0%, var(--gold-bright) 50%, var(--gold-primary) 100%);
+      background: linear-gradient(135deg, #F5D576 0%, var(--gold-bright) 48%, var(--gold-primary) 100%);
       color: var(--obsidian);
-      border: 1px solid rgba(255, 240, 195, 0.65);
-      padding: 0.62rem 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      padding: 0.64rem 0.9rem;
       border-radius: 999px;
       font-size: 0.85rem;
       font-weight: 800;
       cursor: pointer;
-      transition: var(--transition);
-      box-shadow: 0 4px 14px rgba(200, 141, 42, 0.25);
+      transition: var(--transition-fluid);
+      box-shadow:
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.75),
+        0 6px 16px rgba(200, 141, 42, 0.28);
     }
 
     .btn-cart-add:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(200, 141, 42, 0.4);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow:
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+        0 10px 24px rgba(200, 141, 42, 0.42);
       filter: brightness(1.04);
     }
 
     .btn-cart-add:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
     }
 
     .btn-cart-add.added {
       background: linear-gradient(135deg, #16A34A, #15803D);
       color: #FFFFFF;
-      border-color: #22C55E;
-      box-shadow: 0 6px 18px rgba(21, 128, 61, 0.35);
+      border-color: rgba(255, 255, 255, 0.45);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 6px 18px rgba(21, 128, 61, 0.35);
     }
 
     .btn-view {
@@ -627,14 +690,17 @@ import { CatalogService } from '../../services/catalog.service';
       align-items: center;
       justify-content: center;
       gap: 0.3rem;
-      background: rgba(21, 16, 11, 0.04);
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: blur(12px) saturate(160%);
+      -webkit-backdrop-filter: blur(12px) saturate(160%);
       color: var(--obsidian);
-      border: 1.5px solid var(--border-gold);
-      padding: 0.62rem 0.85rem;
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      box-shadow: var(--glass-specular-light), 0 4px 12px rgba(21, 16, 11, 0.06);
+      padding: 0.64rem 0.85rem;
       border-radius: 999px;
       font-size: 0.84rem;
       font-weight: 800;
-      transition: var(--transition);
+      transition: var(--transition-fluid);
     }
 
     .btn-view-arrow {
@@ -642,11 +708,12 @@ import { CatalogService } from '../../services/catalog.service';
     }
 
     .btn-view:hover {
-      background: var(--obsidian);
+      background: rgba(21, 16, 11, 0.88);
+      backdrop-filter: var(--glass-blur);
       color: var(--gold-bright);
-      border-color: var(--obsidian);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-sm);
+      border-color: rgba(255, 255, 255, 0.24);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: var(--glass-specular-dark), var(--shadow-md);
     }
 
     .btn-view:hover .btn-view-arrow {

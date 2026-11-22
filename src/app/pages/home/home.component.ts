@@ -344,16 +344,17 @@ import { CatalogService } from '../../services/catalog.service';
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      background: rgba(229, 184, 75, 0.14);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(229, 184, 75, 0.45);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid rgba(255, 255, 255, 0.22);
       color: var(--gold-bright);
-      padding: 0.38rem 1.05rem;
+      padding: 0.4rem 1.1rem;
       border-radius: 999px;
       font-size: 0.85rem;
       font-weight: 700;
       margin-bottom: 1.15rem;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--glass-specular-dark), 0 8px 22px rgba(0, 0, 0, 0.22);
     }
 
     .corp-hero h1 {
@@ -406,10 +407,13 @@ import { CatalogService } from '../../services/catalog.service';
       gap: 0.35rem;
       font-size: 0.8rem;
       font-weight: 700;
-      color: #E7D6BE;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(229, 184, 75, 0.24);
-      padding: 0.3rem 0.8rem;
+      color: #F3E6D3;
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      padding: 0.34rem 0.85rem;
       border-radius: 999px;
     }
 
@@ -521,9 +525,14 @@ import { CatalogService } from '../../services/catalog.service';
 
     .visual-caption {
       position: absolute;
-      inset: auto 0 0 0;
-      background: linear-gradient(to top, rgba(14, 9, 5, 0.96) 15%, transparent);
-      padding: 1.15rem 1rem 0.95rem;
+      inset: auto 0.65rem 0.65rem 0.65rem;
+      border-radius: 14px;
+      background: rgba(16, 11, 7, 0.56);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: var(--glass-specular-dark), 0 8px 24px rgba(0, 0, 0, 0.35);
+      padding: 0.8rem 1rem;
       display: flex;
       flex-direction: column;
     }
@@ -556,14 +565,14 @@ import { CatalogService } from '../../services/catalog.service';
     .milestone-card {
       position: relative;
       overflow: hidden;
-      background: rgba(22, 16, 10, 0.94);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(229, 184, 75, 0.34);
+      background: rgba(22, 16, 10, 0.62);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: var(--radius-md);
       padding: 1.35rem;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
-      transition: var(--transition);
+      box-shadow: var(--glass-specular-dark), 0 18px 40px rgba(0, 0, 0, 0.26);
+      transition: var(--transition-fluid);
     }
 
     .milestone-card::before {
@@ -840,20 +849,22 @@ import { CatalogService } from '../../services/catalog.service';
     }
 
     .curated-card {
-      background: var(--bg-card);
-      border: 1.5px solid var(--border-color);
+      background: rgba(255, 253, 249, 0.72);
+      backdrop-filter: blur(16px) saturate(170%);
+      -webkit-backdrop-filter: blur(16px) saturate(170%);
+      border: 1.5px solid rgba(255, 255, 255, 0.8);
       border-radius: var(--radius-lg);
       overflow: hidden;
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--glass-specular-light), var(--shadow-sm);
       display: flex;
       flex-direction: column;
-      transition: var(--transition);
+      transition: var(--transition-fluid);
     }
 
     .curated-card:hover {
-      transform: translateY(-6px);
-      border-color: var(--gold-primary);
-      box-shadow: var(--shadow-lg), 0 0 0 1px rgba(229, 184, 75, 0.25);
+      transform: translateY(-7px) scale(1.01);
+      border-color: rgba(229, 184, 75, 0.75);
+      box-shadow: var(--glass-specular-light), var(--shadow-lg), 0 0 24px rgba(229, 184, 75, 0.18);
     }
 
     .curated-media {
