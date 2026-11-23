@@ -1,5 +1,6 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HoneyJar3dComponent } from '../../components/honey-jar-3d/honey-jar-3d.component';
 import { CategoryId, Product } from '../../models/catalog.models';
 import { CartService } from '../../services/cart.service';
 import { CatalogService } from '../../services/catalog.service';
@@ -7,7 +8,7 @@ import { CatalogService } from '../../services/catalog.service';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, HoneyJar3dComponent],
   template: `
     <!-- الواجهة المؤسسية الرئيسية للشركة -->
     <section class="corp-hero">
@@ -76,6 +77,67 @@ import { CatalogService } from '../../services/catalog.service';
             <p>{{ m.detail }}</p>
           </div>
         }
+      </div>
+    </section>
+
+    <!-- معرض ثلاثي الأبعاد 360° بتقنية Liquid Glass -->
+    <section class="section-block showcase-3d-section">
+      <div class="container">
+        <div class="showcase-3d-glass">
+          <div class="showcase-3d-stage">
+            <div class="stage-top-bar">
+              <span class="stage-pill">✨ عبوة زجاجية 360° بعسل سائل حي</span>
+              <span class="stage-hint">اسحب للتدوير من كل الجهات • قرّب للتفاصيل</span>
+            </div>
+            <app-honey-jar-3d
+              #honeyJar3d
+              [autoRotate]="autoRotate3D()"
+              class="honey-3d-viewer"
+            />
+            <div class="stage-pedestal-glow"></div>
+          </div>
+
+          <div class="showcase-3d-info">
+            <span class="eyebrow">✦ تجربة تفاعلية حصرية</span>
+            <h2>تأمّل العبوة الملكية والعسل السائل يتحرك بداخلها</h2>
+            <p>
+              عبوة زجاجية مغلقة بالكامل بقاعدة سميكة وغطاء ذهبي فاخر، وبداخلها عسل السدر
+              اليمني السائل الذي يتموج ويتفاعل فيزيائياً مع كل حركة وتدوير للعبوة.
+            </p>
+
+            <div class="showcase-3d-controls">
+              <button
+                type="button"
+                class="control-glass-btn"
+                (click)="honeyJar3d.swirlHoney(1.2)"
+              >
+                🍯 تحريك العسل السائل
+              </button>
+              <button
+                type="button"
+                class="control-glass-btn"
+                [class.active]="autoRotate3D()"
+                (click)="autoRotate3D.set(!autoRotate3D())"
+              >
+                {{ autoRotate3D() ? '⏸️ إيقاف التدوير' : '🔄 تفعيل التدوير' }}
+              </button>
+              <button
+                type="button"
+                class="control-glass-btn"
+                (click)="reset3DCamera()"
+              >
+                🎯 إعادة ضبط الزاوية
+              </button>
+            </div>
+
+            <div class="showcase-3d-actions">
+              <a routerLink="/shop" [queryParams]="{ category: 'honey' }" class="btn-gold">
+                🛍️ تسوّق قسم العسل الطبيعي
+              </a>
+              <a routerLink="/about" class="btn-outline-light">معايير التغليف والجودة</a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -614,6 +676,166 @@ import { CatalogService } from '../../services/catalog.service';
     .milestone-card p {
       font-size: 0.82rem;
       color: #C7B6A2;
+    }
+
+    .showcase-3d-section {
+      padding-top: 2.25rem;
+      padding-bottom: 1.5rem;
+    }
+
+    .showcase-3d-glass {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 2.25rem;
+      align-items: center;
+      padding: 1.75rem;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(229, 184, 75, 0.2) 0%, transparent 50%),
+        linear-gradient(145deg, rgba(20, 14, 9, 0.92), rgba(36, 26, 16, 0.94));
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      box-shadow:
+        var(--glass-specular-dark),
+        var(--shadow-lg),
+        0 0 36px rgba(229, 184, 75, 0.14);
+      color: #FFFFFF;
+    }
+
+    .showcase-3d-stage {
+      position: relative;
+      height: 410px;
+      border-radius: 22px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 48%, rgba(229, 184, 75, 0.22) 0%, rgba(21, 15, 9, 0.95) 72%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 0 35px rgba(0, 0, 0, 0.45);
+    }
+
+    .stage-top-bar {
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      left: 0.85rem;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+
+    .stage-pill,
+    .stage-hint {
+      background: rgba(18, 12, 7, 0.62);
+      backdrop-filter: blur(12px) saturate(170%);
+      -webkit-backdrop-filter: blur(12px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      padding: 0.26rem 0.78rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    .stage-pill {
+      color: var(--gold-bright);
+    }
+
+    .stage-hint {
+      color: #E7D6BE;
+    }
+
+    .honey-3d-viewer {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: block;
+      --poster-color: transparent;
+    }
+
+    .stage-pedestal-glow {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 68%;
+      height: 36px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(229, 184, 75, 0.35) 0%, rgba(200, 141, 42, 0.1) 55%, transparent 75%);
+      border-top: 1px solid rgba(229, 184, 75, 0.3);
+      filter: blur(2px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .showcase-3d-info .eyebrow {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--gold-bright);
+      padding: 0.25rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+
+    .showcase-3d-info h2 {
+      font-size: 1.85rem;
+      font-weight: 900;
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F7E7C0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .showcase-3d-info p {
+      color: #D7C8B6;
+      font-size: 0.96rem;
+      line-height: 1.8;
+      margin-bottom: 1.35rem;
+    }
+
+    .showcase-3d-controls {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.4rem;
+    }
+
+    .control-glass-btn {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      color: #F3E6D3;
+      padding: 0.5rem 0.95rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-fluid);
+    }
+
+    .control-glass-btn:hover,
+    .control-glass-btn.active {
+      background: rgba(229, 184, 75, 0.22);
+      border-color: var(--gold-bright);
+      color: var(--gold-bright);
+      transform: translateY(-2px);
+    }
+
+    .showcase-3d-actions {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
     }
 
     .about-preview-grid {
@@ -1190,6 +1412,7 @@ import { CatalogService } from '../../services/catalog.service';
 
     @media (max-width: 1024px) {
       .corp-hero-grid,
+      .showcase-3d-glass,
       .about-preview-grid {
         grid-template-columns: 1fr;
       }
@@ -1233,6 +1456,16 @@ import { CatalogService } from '../../services/catalog.service';
       }
       .main-visual {
         height: 225px;
+      }
+      .showcase-3d-glass {
+        padding: 1.15rem;
+        gap: 1.35rem;
+      }
+      .showcase-3d-stage {
+        height: 310px;
+      }
+      .showcase-3d-info h2 {
+        font-size: 1.45rem;
       }
       .visual-thumb-btn {
         height: 78px;
@@ -1340,6 +1573,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   ];
 
+  @ViewChild('honeyJar3d') honeyJar3dRef?: HoneyJar3dComponent;
+  readonly autoRotate3D = signal(true);
   readonly activeSpotlightIndex = signal(0);
   readonly activeSpotlight = computed(() => this.spotlightItems[this.activeSpotlightIndex()]);
   readonly curatedCategory = signal<CategoryId>('honey');
@@ -1367,6 +1602,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.spotlightTimer) {
       clearInterval(this.spotlightTimer);
     }
+  }
+
+  reset3DCamera(): void {
+    this.honeyJar3dRef?.resetCamera();
   }
 
   quickAdd(product: Product): void {
