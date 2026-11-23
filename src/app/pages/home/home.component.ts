@@ -85,10 +85,6 @@ import { CatalogService } from '../../services/catalog.service';
       <div class="container">
         <div class="showcase-3d-glass">
           <div class="showcase-3d-stage">
-            <div class="stage-top-bar">
-              <span class="stage-pill">✨ عبوة زجاجية 360° بعسل سائل حي</span>
-              <span class="stage-hint">اسحب للتدوير من كل الجهات • قرّب للتفاصيل</span>
-            </div>
             <app-honey-jar-3d
               #honeyJar3d
               [autoRotate]="autoRotate3D()"
@@ -712,40 +708,6 @@ import { CatalogService } from '../../services/catalog.service';
         radial-gradient(circle at 50% 48%, rgba(229, 184, 75, 0.22) 0%, rgba(21, 15, 9, 0.95) 72%);
       border: 1px solid rgba(255, 255, 255, 0.18);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 0 35px rgba(0, 0, 0, 0.45);
-    }
-
-    .stage-top-bar {
-      position: absolute;
-      top: 0.85rem;
-      right: 0.85rem;
-      left: 0.85rem;
-      z-index: 3;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.5rem;
-      pointer-events: none;
-    }
-
-    .stage-pill,
-    .stage-hint {
-      background: rgba(18, 12, 7, 0.62);
-      backdrop-filter: blur(12px) saturate(170%);
-      -webkit-backdrop-filter: blur(12px) saturate(170%);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      padding: 0.26rem 0.78rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 800;
-    }
-
-    .stage-pill {
-      color: var(--gold-bright);
-    }
-
-    .stage-hint {
-      color: #E7D6BE;
     }
 
     .honey-3d-viewer {
